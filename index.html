@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>每日重大新闻</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="todayLabel">今日新闻</p>
+          <h1>每日重大新闻</h1>
+        </div>
+        <div class="topbar-actions" aria-label="新闻工具">
+          <label class="search-box" for="searchInput">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="搜索标题、来源或摘要" autocomplete="off" />
+          </label>
+          <button class="refresh-button" id="refreshBtn" type="button" title="刷新新闻" aria-label="刷新新闻">
+            <span aria-hidden="true">↻</span>
+            <span>刷新新闻</span>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="status-strip" aria-live="polite">
+          <div>
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">正在连接新闻源</span>
+          </div>
+          <div class="live-status">
+            <span class="live-pill"><span aria-hidden="true"></span>手动刷新</span>
+            <span id="updatedAt">尚未更新</span>
+          </div>
+        </section>
+
+        <nav class="category-filter" aria-label="新闻类型筛选">
+          <button class="category-chip is-active" type="button" data-category="all">全部</button>
+          <button class="category-chip" type="button" data-category="finance">金融</button>
+          <button class="category-chip" type="button" data-category="tech">科技</button>
+          <button class="category-chip" type="button" data-category="life">生活</button>
+          <button class="category-chip" type="button" data-category="politics">政治</button>
+          <button class="category-chip" type="button" data-category="society">社会</button>
+          <button class="category-chip" type="button" data-category="culture">文体</button>
+        </nav>
+
+        <section class="lead-layout" id="leadLayout" aria-label="头条新闻"></section>
+
+        <nav class="mobile-tabs" aria-label="新闻模块">
+          <button class="tab is-active" type="button" data-tab="all">全部</button>
+          <button class="tab" type="button" data-tab="domestic">国内</button>
+          <button class="tab" type="button" data-tab="world">国外</button>
+        </nav>
+
+        <section class="news-grid" aria-label="每日新闻列表">
+          <article class="module" data-module="domestic">
+            <div class="module-heading">
+              <div>
+                <p class="module-kicker domestic">Domestic</p>
+                <h2>国内</h2>
+              </div>
+              <span class="count" id="domesticCount">0 条</span>
+            </div>
+            <div class="story-list" id="domesticList"></div>
+          </article>
+
+          <article class="module" data-module="world">
+            <div class="module-heading">
+              <div>
+                <p class="module-kicker world">World</p>
+                <h2>国外</h2>
+              </div>
+              <span class="count" id="worldCount">0 条</span>
+            </div>
+            <div class="story-list" id="worldList"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <template id="storyTemplate">
+      <a class="story-card" target="_blank" rel="noreferrer">
+        <img class="story-image" alt="" loading="lazy" />
+        <div class="story-content">
+          <div class="story-meta">
+            <span>
+              <span class="source"></span>
+              <span class="category"></span>
+            </span>
+            <span class="time"></span>
+          </div>
+          <h3></h3>
+          <p></p>
+        </div>
+      </a>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
