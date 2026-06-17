@@ -1,0 +1,12 @@
+{
+  "name": "daily-news-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A personal daily news website with domestic/world modules and category filters.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

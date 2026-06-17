@@ -13,20 +13,6 @@ const RSS_SOURCES = {
       url: "https://rsshub.app/cctv/china",
     },
   ],
-  world: [
-    {
-      name: "BBC 中文",
-      url: "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml",
-    },
-    {
-      name: "联合国新闻",
-      url: "https://news.un.org/feed/subscribe/zh/news/all/rss.xml",
-    },
-    {
-      name: "央视国际",
-      url: "https://rsshub.app/cctv/world",
-    },
-  ],
 };
 
 const FALLBACK_STORIES = [
@@ -57,33 +43,6 @@ const FALLBACK_STORIES = [
     publishedAt: new Date(Date.now() - 72e5).toISOString(),
     image: "",
   },
-  {
-    module: "world",
-    source: "演示数据",
-    title: "全球政治、经济与科技议题构成今日国际新闻主线",
-    summary: "国外模块汇总国际新闻源，适合快速浏览世界范围内的重大事件。",
-    link: "#",
-    publishedAt: new Date(Date.now() - 18e5).toISOString(),
-    image: "",
-  },
-  {
-    module: "world",
-    source: "演示数据",
-    title: "多边组织、区域安全和市场波动继续牵动国际舆论",
-    summary: "真实抓取成功后，演示数据会自动让位于当天新闻。",
-    link: "#",
-    publishedAt: new Date(Date.now() - 54e5).toISOString(),
-    image: "",
-  },
-  {
-    module: "world",
-    source: "演示数据",
-    title: "气候、能源与公共卫生议题在多国议程中升温",
-    summary: "卡片会保留来源和发布时间，便于判断新闻时效。",
-    link: "#",
-    publishedAt: new Date(Date.now() - 96e5).toISOString(),
-    image: "",
-  },
 ];
 
 const FETCH_TIMEOUT = 4000;
@@ -91,12 +50,11 @@ const FETCH_TIMEOUT = 4000;
 const DEFAULT_IMAGES = {
   domestic:
     "https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=900&q=80",
-  world:
-    "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=900&q=80",
 };
 
 const CATEGORY_LABELS = {
   all: "全部",
+  general: "综合",
   finance: "金融",
   tech: "科技",
   life: "生活",
@@ -107,37 +65,43 @@ const CATEGORY_LABELS = {
 
 const CATEGORY_RULES = [
   {
-    id: "finance",
-    keywords: ["金融", "财经", "经济", "股", "证券", "基金", "银行", "央行", "汇率", "债券", "市场", "投资", "消费", "finance", "market", "stock", "bank"],
-  },
-  {
-    id: "tech",
-    keywords: ["科技", "人工智能", "AI", "芯片", "半导体", "互联网", "数据", "机器人", "航天", "手机", "电动", "新能源", "tech", "technology", "chip", "robot"],
-  },
-  {
-    id: "life",
-    keywords: ["生活", "健康", "医疗", "教育", "旅游", "天气", "住房", "交通", "美食", "养老", "就业", "消费", "health", "travel", "education"],
+    id: "society",
+    strong: ["社会", "民生", "法治", "法院", "警方", "事故", "灾害", "救援", "安全", "案件", "犯罪", "火灾", "地震", "洪水", "伤亡", "失踪", "公共安全", "交通事故", "crime", "court", "police"],
+    weak: ["社区", "公共", "居民", "调查", "纠纷"],
   },
   {
     id: "politics",
-    keywords: ["政治", "政策", "政府", "外交", "会议", "总统", "总理", "选举", "国会", "议会", "部长", "policy", "election", "government"],
+    strong: ["政治", "政策", "政府", "外交", "会议", "总统", "总理", "选举", "国会", "议会", "部长", "白宫", "内阁", "联合国", "制裁", "policy", "election", "government"],
+    weak: ["声明", "访问", "会见", "谈判", "协议"],
   },
   {
-    id: "society",
-    keywords: ["社会", "民生", "法治", "法院", "警方", "事故", "灾害", "救援", "安全", "案件", "公共", "crime", "court", "police"],
+    id: "finance",
+    strong: ["金融", "财经", "证券", "基金", "银行", "央行", "汇率", "债券", "股市", "股票", "A股", "港股", "美股", "通胀", "降息", "加息", "finance", "stock", "bond", "bank", "inflation"],
+    weak: ["经济", "市场", "投资", "贸易", "关税", "企业", "财报"],
+  },
+  {
+    id: "tech",
+    strong: ["人工智能", "AI", "芯片", "半导体", "量子", "机器人", "航天", "卫星", "5G", "6G", "算力", "大模型", "算法", "ChatGPT", "OpenAI", "英伟达", "Nvidia", "tech", "technology", "chip", "robot"],
+    weak: ["科技", "技术", "互联网", "数据", "数字化", "软件", "硬件", "智能"],
+  },
+  {
+    id: "life",
+    strong: ["生活", "健康", "医疗", "教育", "旅游", "天气", "住房", "养老", "就业", "美食", "health", "travel", "education"],
+    weak: ["消费", "出行", "学校", "医院", "家庭", "服务"],
   },
   {
     id: "culture",
-    keywords: ["文化", "体育", "电影", "音乐", "赛事", "比赛", "演出", "艺术", "博物馆", "文旅", "sports", "film", "music"],
+    strong: ["文化", "体育", "电影", "音乐", "赛事", "比赛", "演出", "艺术", "博物馆", "文旅", "sports", "film", "music"],
+    weak: ["球队", "冠军", "展览", "票房", "剧集"],
   },
 ];
 
 const state = {
   stories: [],
   query: "",
-  activeTab: "all",
   activeCategory: "all",
   isLoading: false,
+  activeArticle: null,
 };
 
 const els = {
@@ -147,15 +111,25 @@ const els = {
   statusDot: document.querySelector("#statusDot"),
   statusText: document.querySelector("#statusText"),
   updatedAt: document.querySelector("#updatedAt"),
-  leadLayout: document.querySelector("#leadLayout"),
-  domesticList: document.querySelector("#domesticList"),
-  worldList: document.querySelector("#worldList"),
-  domesticCount: document.querySelector("#domesticCount"),
-  worldCount: document.querySelector("#worldCount"),
-  tabs: document.querySelectorAll(".tab"),
+  newsBoard: document.querySelector("#newsBoard"),
+  visibleCount: document.querySelector("#visibleCount"),
+  sectionKicker: document.querySelector("#sectionKicker"),
+  sectionTitle: document.querySelector("#sectionTitle"),
+  totalCount: document.querySelector("#totalCount"),
+  currentCount: document.querySelector("#currentCount"),
+  domesticOverview: document.querySelector("#domesticOverview"),
+  categoryOverview: document.querySelector("#categoryOverview"),
   categoryTabs: document.querySelectorAll(".category-chip"),
-  modules: document.querySelectorAll("[data-module]"),
+  categoryCounts: document.querySelectorAll("[data-category-count]"),
   template: document.querySelector("#storyTemplate"),
+  articleDrawer: document.querySelector("#articleDrawer"),
+  articleSource: document.querySelector("#articleSource"),
+  articleTitle: document.querySelector("#articleTitle"),
+  articleSummary: document.querySelector("#articleSummary"),
+  articleParagraphs: document.querySelector("#articleParagraphs"),
+  articleNotice: document.querySelector("#articleNotice"),
+  articleOriginal: document.querySelector("#articleOriginal"),
+  articleCloseTargets: document.querySelectorAll("[data-close-article]"),
 };
 
 const formatter = new Intl.DateTimeFormat("zh-CN", {
@@ -173,20 +147,20 @@ els.searchInput.addEventListener("input", (event) => {
   render();
 });
 
-els.tabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    state.activeTab = tab.dataset.tab;
-    els.tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
-    render();
-  });
-});
-
 els.categoryTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     state.activeCategory = tab.dataset.category;
     els.categoryTabs.forEach((item) => item.classList.toggle("is-active", item === tab));
     render();
   });
+});
+
+els.articleCloseTargets.forEach((target) => {
+  target.addEventListener("click", closeArticle);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeArticle();
 });
 
 loadNews({ reason: "initial" });
@@ -206,9 +180,9 @@ async function loadNews(options = {}) {
 
     if (hasLiveStories) {
       const sourceLabel = source === "cloud" ? "云端接口" : "浏览器";
-      setStatus("online", `${sourceLabel}已获取 ${normalizedStories.length} 条新闻`);
+      setStatus("online", `${sourceLabel}已获取 ${normalizedStories.length} 条国内新闻`);
     } else {
-      setStatus("offline", "暂未获取到带原文配图的新闻，可稍后点击刷新重试");
+      setStatus("offline", "新闻源暂不可用，正在显示默认内容");
     }
   } catch (error) {
     state.stories = normalizeAndSort(FALLBACK_STORIES);
@@ -251,7 +225,6 @@ async function fetchCloudNews() {
 async function fetchBrowserNews() {
   const results = await Promise.allSettled([
     fetchModule("domestic"),
-    fetchModule("world"),
   ]);
 
   return results
@@ -345,79 +318,64 @@ function normalizeAndSort(stories) {
 }
 
 function render() {
-  const filtered = state.stories.filter((story) => {
-    const inTab = state.activeTab === "all" || story.module === state.activeTab;
-    const inCategory = state.activeCategory === "all" || story.category === state.activeCategory;
+  const baseFiltered = state.stories.filter((story) => {
     const haystack = `${story.title} ${story.source} ${story.summary} ${getCategoryLabel(story.category)}`.toLowerCase();
-    return inTab && inCategory && (!state.query || haystack.includes(state.query));
+    return !state.query || haystack.includes(state.query);
   });
 
-  const domestic = filtered.filter((story) => story.module === "domestic").slice(0, 8);
-  const world = filtered.filter((story) => story.module === "world").slice(0, 8);
+  const filtered = baseFiltered.filter((story) => {
+    return state.activeCategory === "all" || story.category === state.activeCategory;
+  });
 
-  renderLeads(filtered);
-  renderList(els.domesticList, domestic, "domestic");
-  renderList(els.worldList, world, "world");
+  renderOverview(baseFiltered, filtered);
+  renderNewsBoard(filtered);
+  renderSectionHeader(filtered.length);
+}
 
-  els.domesticCount.textContent = `${domestic.length} 条`;
-  els.worldCount.textContent = `${world.length} 条`;
+function renderSectionHeader(count) {
+  const categoryLabel = state.activeCategory === "all" ? "全部类型" : getCategoryLabel(state.activeCategory);
+  els.sectionTitle.textContent = "国内新闻";
+  els.sectionKicker.textContent = categoryLabel;
+  els.visibleCount.textContent = `${count} 条`;
+}
 
-  els.modules.forEach((module) => {
-    const shouldHide = state.activeTab !== "all" && module.dataset.module !== state.activeTab;
-    module.classList.toggle("is-hidden", shouldHide);
+function renderOverview(baseStories, filteredStories) {
+  const visibleDomestic = filteredStories.filter((story) => story.module === "domestic").length;
+  const visibleCategories = new Set(filteredStories.map((story) => story.category)).size;
+
+  els.totalCount.textContent = state.stories.length;
+  els.currentCount.textContent = filteredStories.length;
+  els.domesticOverview.textContent = visibleDomestic;
+  els.categoryOverview.textContent = visibleCategories;
+
+  els.categoryCounts.forEach((node) => {
+    const category = node.dataset.categoryCount;
+    const count = category === "all"
+      ? baseStories.length
+      : baseStories.filter((story) => story.category === category).length;
+    node.textContent = count;
   });
 }
 
-function renderLeads(stories) {
-  const leadStories = [
-    stories.find((story) => story.module === "domestic"),
-    stories.find((story) => story.module === "world"),
-  ].filter(Boolean);
-
-  els.leadLayout.innerHTML = "";
-
-  leadStories.forEach((story, index) => {
-    const card = document.createElement("a");
-    card.className = `lead-card ${index ? "secondary" : ""}`;
-    card.href = story.link || "#";
-    card.target = "_blank";
-    card.rel = "noreferrer";
-
-    card.innerHTML = `
-      <img src="${escapeAttribute(story.image)}" alt="" />
-      <div class="lead-copy">
-        <div>
-          <span class="lead-badge ${story.module}">${story.module === "domestic" ? "国内头条" : "国外头条"}</span>
-          <span class="lead-badge neutral">${getCategoryLabel(story.category)}</span>
-          <h2>${escapeHTML(story.title)}</h2>
-          <p>${escapeHTML(story.summary)}</p>
-        </div>
-        <div class="lead-source">
-          <span>${escapeHTML(story.source)}</span>
-          <span>${formatRelative(story.publishedAt)}</span>
-        </div>
-      </div>
-    `;
-    els.leadLayout.appendChild(card);
-  });
-}
-
-function renderList(container, stories, module) {
-  container.innerHTML = "";
-
+function renderNewsBoard(stories) {
+  els.newsBoard.innerHTML = "";
   if (!stories.length) {
     const empty = document.createElement("div");
     empty.className = "empty-state";
     empty.textContent = state.query ? "没有匹配的新闻。" : "暂无可显示新闻。";
-    container.appendChild(empty);
+    els.newsBoard.appendChild(empty);
     return;
   }
 
   const fragment = document.createDocumentFragment();
-  stories.forEach((story) => {
+  stories.slice(0, 20).forEach((story, index) => {
     const node = els.template.content.firstElementChild.cloneNode(true);
+    node.classList.add(getCardSizeClass(index));
     node.href = story.link || "#";
-    node.querySelector("img").src = story.image || DEFAULT_IMAGES[module];
+    node.addEventListener("click", (event) => {
+      event.preventDefault();
+      openArticle(story);
+    });
     node.querySelector(".source").textContent = story.source;
     node.querySelector(".category").textContent = getCategoryLabel(story.category);
     node.querySelector(".time").textContent = formatRelative(story.publishedAt);
@@ -425,22 +383,110 @@ function renderList(container, stories, module) {
     node.querySelector("p").textContent = story.summary;
     fragment.appendChild(node);
   });
-  container.appendChild(fragment);
+  els.newsBoard.appendChild(fragment);
+}
+
+function getCardSizeClass(index) {
+  const pattern = [
+    "is-hero",
+    "is-tall",
+    "is-wide",
+    "is-compact",
+    "is-compact",
+    "is-wide",
+    "is-tall",
+    "is-compact",
+    "is-compact",
+    "is-wide",
+  ];
+  return pattern[index % pattern.length];
+}
+
+async function openArticle(story) {
+  state.activeArticle = story;
+  renderArticleShell(story);
+  els.articleDrawer.classList.add("is-open");
+  els.articleDrawer.setAttribute("aria-hidden", "false");
+  document.body.classList.add("article-open");
+
+  if (!story.link || story.link === "#") {
+    renderArticleContent(story, null);
+    return;
+  }
+
+  try {
+    const response = await fetchWithTimeout(`/api/article?url=${encodeURIComponent(story.link)}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const article = await response.json();
+    if (state.activeArticle !== story) return;
+    renderArticleContent(story, article);
+  } catch (error) {
+    renderArticleContent(story, null);
+  }
+}
+
+function renderArticleShell(story) {
+  els.articleSource.textContent = `${story.source} · ${getCategoryLabel(story.category)} · ${formatRelative(story.publishedAt)}`;
+  els.articleTitle.textContent = story.title;
+  els.articleSummary.textContent = story.summary;
+  els.articleParagraphs.innerHTML = `<p class="article-loading">正在提取新闻导读...</p>`;
+  els.articleNotice.textContent = "本站展示新闻导读和正文摘录，完整内容请查看原文。";
+  els.articleOriginal.href = story.link || "#";
+}
+
+function renderArticleContent(story, article) {
+  const title = article?.title || story.title;
+  const summary = article?.description || story.summary;
+  const paragraphs = Array.isArray(article?.paragraphs) && article.paragraphs.length
+    ? article.paragraphs
+    : [story.summary];
+
+  els.articleTitle.textContent = title;
+  els.articleSummary.textContent = summary;
+  els.articleParagraphs.innerHTML = "";
+
+  paragraphs.forEach((paragraph) => {
+    const node = document.createElement("p");
+    node.textContent = paragraph;
+    els.articleParagraphs.appendChild(node);
+  });
+
+  els.articleNotice.textContent = article?.notice || "当前显示新闻摘要和正文摘录，完整内容请查看原文。";
+  els.articleOriginal.href = article?.originalUrl || story.link || "#";
+}
+
+function closeArticle() {
+  if (!els.articleDrawer.classList.contains("is-open")) return;
+  state.activeArticle = null;
+  els.articleDrawer.classList.remove("is-open");
+  els.articleDrawer.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("article-open");
 }
 
 function inferCategory(story) {
   const text = `${story.title || ""} ${story.summary || ""} ${story.source || ""}`;
   const lowerText = text.toLowerCase();
+  const scores = CATEGORY_RULES.map((rule) => {
+    const strongHits = countKeywordHits(lowerText, rule.strong);
+    const weakHits = countKeywordHits(lowerText, rule.weak);
+    return {
+      id: rule.id,
+      score: strongHits * 3 + weakHits,
+      strongHits,
+    };
+  }).sort((a, b) => b.score - a.score);
 
-  const match = CATEGORY_RULES.find((rule) =>
-    rule.keywords.some((keyword) => lowerText.includes(keyword.toLowerCase())),
-  );
+  const best = scores[0];
+  if (!best || best.score < 3 || best.strongHits === 0) return "general";
+  return best.id;
+}
 
-  return match?.id || "society";
+function countKeywordHits(text, keywords = []) {
+  return keywords.filter((keyword) => text.includes(keyword.toLowerCase())).length;
 }
 
 function getCategoryLabel(category) {
-  return CATEGORY_LABELS[category] || "社会";
+  return CATEGORY_LABELS[category] || "综合";
 }
 
 function getText(item, selector) {

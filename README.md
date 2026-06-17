@@ -34,3 +34,20 @@ http://127.0.0.1:5173/
 - `styles.css`：页面样式
 - `app.js`：前端交互、搜索、手动刷新、浏览器兜底抓取
 - `api/news.js`：Vercel 云端新闻接口
+- `api/article.js`：站内新闻详情接口，提取新闻导读、配图和正文摘录
+- `server.js`：轻量服务器部署入口
+- `package.json`：Node.js 启动配置
+
+## 香港轻量服务器运行
+
+服务器安装 Node.js 18 或更高版本后，在项目目录运行：
+
+```bash
+npm start
+```
+
+默认监听：
+
+```text
+http://服务器IP:3000
+```
