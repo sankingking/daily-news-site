@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>每日重大新闻</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="headline">
+          <p class="eyebrow" id="todayLabel">今日新闻</p>
+          <h1>每日重大新闻</h1>
+          <p class="subtitle">聚合国内重点资讯，按综合、金融、科技、生活等类型快速筛选。</p>
+        </div>
+        <div class="topbar-actions" aria-label="新闻工具">
+          <label class="search-box" for="searchInput">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="搜索标题、来源或摘要" autocomplete="off" />
+          </label>
+          <button class="refresh-button" id="refreshBtn" type="button" title="刷新新闻" aria-label="刷新新闻">
+            <span aria-hidden="true">↻</span>
+            <span>刷新新闻</span>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="status-strip" aria-live="polite">
+          <div>
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">正在连接新闻源</span>
+          </div>
+          <div class="live-status">
+            <span class="live-pill"><span aria-hidden="true"></span>手动刷新</span>
+            <span id="updatedAt">尚未更新</span>
+          </div>
+        </section>
+
+        <nav class="category-filter" aria-label="新闻类型筛选">
+          <button class="category-chip is-active" type="button" data-category="all">
+            <span>全部</span><strong data-category-count="all">0</strong>
+          </button>
+          <button class="category-chip" type="button" data-category="general">
+            <span>综合</span><strong data-category-count="general">0</strong>
+          </button>
+          <button class="category-chip" type="button" data-category="finance">
+            <span>金融</span><strong data-category-count="finance">0</strong>
+          </button>
+          <button class="category-chip" type="button" data-category="tech">
+            <span>科技</span><strong data-category-count="tech">0</strong>
+          </button>
+          <button class="category-chip" type="button" data-category="life">
+            <span>生活</span><strong data-category-count="life">0</strong>
+          </button>
+          <button class="category-chip" type="button" data-category="politics">
+            <span>政治</span><strong data-category-count="politics">0</strong>
+          </button>
+          <button class="category-chip" type="button" data-category="society">
+            <span>社会</span><strong data-category-count="society">0</strong>
+          </button>
+          <button class="category-chip" type="button" data-category="culture">
+            <span>文体</span><strong data-category-count="culture">0</strong>
+          </button>
+        </nav>
+
+        <section class="overview-grid" aria-label="新闻概览">
+          <div class="overview-card">
+            <span>已载入</span>
+            <strong id="totalCount">0</strong>
+          </div>
+          <div class="overview-card">
+            <span>当前筛选</span>
+            <strong id="currentCount">0</strong>
+          </div>
+          <div class="overview-card">
+            <span>国内</span>
+            <strong id="domesticOverview">0</strong>
+          </div>
+          <div class="overview-card">
+            <span>分类</span>
+            <strong id="categoryOverview">0</strong>
+          </div>
+        </section>
+
+        <section class="news-stage" aria-label="每日新闻列表">
+          <div class="section-heading">
+            <div>
+              <p class="module-kicker" id="sectionKicker">全部类型</p>
+              <h2 id="sectionTitle">全部新闻</h2>
+            </div>
+              <span class="count" id="visibleCount">0 条</span>
+          </div>
+          <div class="square-news-grid" id="newsBoard"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="storyTemplate">
+      <a class="story-card" target="_blank" rel="noreferrer">
+        <div class="story-content">
+          <div class="story-meta">
+            <span>
+              <span class="source"></span>
+              <span class="category"></span>
+            </span>
+            <span class="time"></span>
+          </div>
+          <h3></h3>
+          <p></p>
+        </div>
+      </a>
+    </template>
+
+    <div class="article-drawer" id="articleDrawer" aria-hidden="true">
+      <div class="article-backdrop" data-close-article></div>
+      <article class="article-panel" role="dialog" aria-modal="true" aria-labelledby="articleTitle">
+        <header class="article-header">
+          <div>
+            <p class="article-kicker" id="articleSource">新闻详情</p>
+            <h2 id="articleTitle">正在加载</h2>
+          </div>
+          <button class="article-close" type="button" aria-label="关闭新闻详情" data-close-article>×</button>
+        </header>
+        <div class="article-body">
+          <p class="article-summary" id="articleSummary"></p>
+          <div class="article-paragraphs" id="articleParagraphs"></div>
+          <p class="article-notice" id="articleNotice">本站展示新闻导读和正文摘录，完整内容请查看原文。</p>
+          <a class="article-original" id="articleOriginal" target="_blank" rel="noreferrer">查看原文</a>
+        </div>
+      </article>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
