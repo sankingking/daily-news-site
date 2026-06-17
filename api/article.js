@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
     const articleUrl = requestUrl.searchParams.get("url");
 
     if (!articleUrl || !/^https?:\/\//i.test(articleUrl)) {
-      res.status(400).json({ error: "INVALID_ARTICLE_URL" });
+      res.status(400).json({ error: "新闻链接无效" });
       return;
     }
 
@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
       notice: "本站展示新闻导读和正文摘录，完整内容请查看原文。",
     });
   } catch (error) {
-    res.status(500).json({ error: "ARTICLE_FETCH_FAILED" });
+    res.status(500).json({ error: "新闻详情提取失败" });
   }
 };
 
