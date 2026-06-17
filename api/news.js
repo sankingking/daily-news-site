@@ -13,20 +13,6 @@ const RSS_SOURCES = {
       url: "https://rsshub.app/cctv/china",
     },
   ],
-  world: [
-    {
-      name: "BBC 中文",
-      url: "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml",
-    },
-    {
-      name: "联合国新闻",
-      url: "https://news.un.org/feed/subscribe/zh/news/all/rss.xml",
-    },
-    {
-      name: "央视国际",
-      url: "https://rsshub.app/cctv/world",
-    },
-  ],
 };
 
 const FETCH_TIMEOUT = 6500;
@@ -36,34 +22,38 @@ const MAX_STORIES_PER_MODULE = 12;
 const DEFAULT_IMAGES = {
   domestic:
     "https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=900&q=80",
-  world:
-    "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=900&q=80",
 };
 
 const CATEGORY_RULES = [
   {
-    id: "finance",
-    keywords: ["金融", "财经", "经济", "股", "证券", "基金", "银行", "央行", "汇率", "债券", "市场", "投资", "消费", "finance", "market", "stock", "bank"],
-  },
-  {
-    id: "tech",
-    keywords: ["科技", "人工智能", "AI", "芯片", "半导体", "互联网", "数据", "机器人", "航天", "手机", "电动", "新能源", "tech", "technology", "chip", "robot"],
-  },
-  {
-    id: "life",
-    keywords: ["生活", "健康", "医疗", "教育", "旅游", "天气", "住房", "交通", "美食", "养老", "就业", "消费", "health", "travel", "education"],
+    id: "society",
+    strong: ["社会", "民生", "法治", "法院", "警方", "事故", "灾害", "救援", "安全", "案件", "犯罪", "火灾", "地震", "洪水", "伤亡", "失踪", "公共安全", "交通事故", "crime", "court", "police"],
+    weak: ["社区", "公共", "居民", "调查", "纠纷"],
   },
   {
     id: "politics",
-    keywords: ["政治", "政策", "政府", "外交", "会议", "总统", "总理", "选举", "国会", "议会", "部长", "policy", "election", "government"],
+    strong: ["政治", "政策", "政府", "外交", "会议", "总统", "总理", "选举", "国会", "议会", "部长", "白宫", "内阁", "联合国", "制裁", "policy", "election", "government"],
+    weak: ["声明", "访问", "会见", "谈判", "协议"],
   },
   {
-    id: "society",
-    keywords: ["社会", "民生", "法治", "法院", "警方", "事故", "灾害", "救援", "安全", "案件", "公共", "crime", "court", "police"],
+    id: "finance",
+    strong: ["金融", "财经", "证券", "基金", "银行", "央行", "汇率", "债券", "股市", "股票", "A股", "港股", "美股", "通胀", "降息", "加息", "finance", "stock", "bond", "bank", "inflation"],
+    weak: ["经济", "市场", "投资", "贸易", "关税", "企业", "财报"],
+  },
+  {
+    id: "tech",
+    strong: ["人工智能", "AI", "芯片", "半导体", "量子", "机器人", "航天", "卫星", "5G", "6G", "算力", "大模型", "算法", "ChatGPT", "OpenAI", "英伟达", "Nvidia", "tech", "technology", "chip", "robot"],
+    weak: ["科技", "技术", "互联网", "数据", "数字化", "软件", "硬件", "智能"],
+  },
+  {
+    id: "life",
+    strong: ["生活", "健康", "医疗", "教育", "旅游", "天气", "住房", "养老", "就业", "美食", "health", "travel", "education"],
+    weak: ["消费", "出行", "学校", "医院", "家庭", "服务"],
   },
   {
     id: "culture",
-    keywords: ["文化", "体育", "电影", "音乐", "赛事", "比赛", "演出", "艺术", "博物馆", "文旅", "sports", "film", "music"],
+    strong: ["文化", "体育", "电影", "音乐", "赛事", "比赛", "演出", "艺术", "博物馆", "文旅", "sports", "film", "music"],
+    weak: ["球队", "冠军", "展览", "票房", "剧集"],
   },
 ];
 
@@ -78,12 +68,11 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const [domestic, world] = await Promise.all([
+    const [domestic] = await Promise.all([
       fetchModule("domestic"),
-      fetchModule("world"),
     ]);
 
-    const stories = normalizeAndSort([...domestic, ...world]);
+    const stories = normalizeAndSort(domestic);
 
     res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=300");
     res.status(200).json({
@@ -96,7 +85,7 @@ module.exports = async function handler(req, res) {
       updatedAt: new Date().toISOString(),
       source: "vercel-api",
       stories: [],
-      error: "NEWS_FETCH_FAILED",
+      error: "新闻抓取失败",
     });
   }
 };
@@ -251,7 +240,7 @@ function normalizeAndSort(stories) {
     }))
     .filter((story) => {
       const key = story.title || story.link;
-      if (!story.title || seen.has(key)) return false;
+      if (!story.title || !isMostlyChinese(story.title, story.summary) || seen.has(key)) return false;
       seen.add(key);
       return true;
     })
@@ -261,12 +250,30 @@ function normalizeAndSort(stories) {
 function inferCategory(story) {
   const text = `${story.title || ""} ${story.summary || ""} ${story.source || ""}`;
   const lowerText = text.toLowerCase();
+  const scores = CATEGORY_RULES.map((rule) => {
+    const strongHits = countKeywordHits(lowerText, rule.strong);
+    const weakHits = countKeywordHits(lowerText, rule.weak);
+    return {
+      id: rule.id,
+      score: strongHits * 3 + weakHits,
+      strongHits,
+    };
+  }).sort((a, b) => b.score - a.score);
 
-  const match = CATEGORY_RULES.find((rule) =>
-    rule.keywords.some((keyword) => lowerText.includes(keyword.toLowerCase())),
-  );
+  const best = scores[0];
+  if (!best || best.score < 3 || best.strongHits === 0) return "general";
+  return best.id;
+}
 
-  return match?.id || "society";
+function countKeywordHits(text, keywords = []) {
+  return keywords.filter((keyword) => text.includes(keyword.toLowerCase())).length;
+}
+
+function isMostlyChinese(title, summary = "") {
+  const text = `${title || ""}${summary || ""}`.replace(/\s+/g, "");
+  if (!text) return false;
+  const chineseCount = (text.match(/[\u4e00-\u9fff]/g) || []).length;
+  return chineseCount >= 8 || chineseCount / text.length >= 0.28;
 }
 
 function pickImage(candidates, baseUrl) {
